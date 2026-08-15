@@ -1,0 +1,3 @@
+# Copy to .dev.vars for local-only values. Never commit secrets.
+# APP_ENV, BASE_DOMAIN, and LOG_LEVEL have safe defaults in wrangler.jsonc.
+# Add secrets here only when a later integration requires them.

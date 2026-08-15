@@ -1,0 +1,97 @@
+export type FieldErrors = Readonly<Record<string, readonly string[]>>;
+
+export interface ApiMeta {
+  readonly request_id: string;
+  readonly [key: string]: unknown;
+}
+
+export interface ApiSuccess<T> {
+  readonly success: true;
+  readonly data: T;
+  readonly message: string;
+  readonly meta: ApiMeta;
+}
+
+export interface ApiError {
+  readonly success: false;
+  readonly message: string;
+  readonly errors: FieldErrors;
+  readonly request_id: string;
+  readonly code?: string;
+}
+
+export type ApiResponse<T> = ApiSuccess<T> | ApiError;
+
+export interface TenantBootstrapData {
+  readonly id: string;
+  readonly slug: string;
+  readonly name: string;
+  readonly plan: string;
+  readonly businessType: 'retail' | 'pharmacy' | 'retail_pharmacy';
+  readonly uiMode: 'simple' | 'professional' | 'advanced';
+  readonly timezone: string;
+}
+
+export interface AuthUserData {
+  readonly id: string;
+  readonly email: string;
+  readonly name: string;
+}
+
+export interface AuthSessionData {
+  readonly expiresAt: string;
+}
+
+export interface LoginData {
+  readonly user: AuthUserData;
+  readonly session: AuthSessionData;
+}
+
+export type SessionData = LoginData;
+
+export interface LogoutData {
+  readonly loggedOut: true;
+}
+
+export interface BranchData {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly timezone: string;
+  readonly isDefault: boolean;
+}
+
+export interface AccessContextData {
+  readonly permissions: readonly string[];
+  readonly branches: readonly BranchData[];
+  readonly activeBranch: BranchData | null;
+}
+
+export interface ManagedSessionData {
+  readonly id: string;
+  readonly createdAt: string;
+  readonly lastSeenAt: string;
+  readonly expiresAt: string;
+  readonly userAgent: string | null;
+  readonly current: boolean;
+}
+
+export interface SessionListData {
+  readonly sessions: readonly ManagedSessionData[];
+}
+
+export interface SessionRevokeData {
+  readonly revoked: true;
+  readonly current: boolean;
+}
+
+export interface HealthData {
+  readonly status: 'ok';
+  readonly environment: 'development' | 'staging' | 'production' | 'test';
+  readonly services: {
+    readonly database: 'up';
+    readonly objectStorage: 'configured';
+    readonly cache: 'configured';
+  };
+  readonly checkedAt: string;
+}
