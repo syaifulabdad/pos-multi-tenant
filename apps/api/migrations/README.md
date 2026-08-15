@@ -11,4 +11,4 @@ npm run db:validate
 npm run db:migrate:local
 ```
 
-`db:validate` applies the complete migration history to an isolated D1 database and runs an upgrade-preservation scenario with existing session and audit rows. It does not modify the normal local development database.
+`db:validate` applies the complete migration history to an isolated D1 database and runs an upgrade-preservation scenario with existing session and audit rows, organization hierarchy inserts, and an explicit cross-tenant foreign-key rejection. It does not modify the normal local development database.

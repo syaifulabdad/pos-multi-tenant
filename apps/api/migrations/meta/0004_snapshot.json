@@ -1,0 +1,1905 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "57a94f79-175b-480d-bfa8-1b39ddbe7f19",
+  "prevId": "25505203-89ab-4b6c-b3d9-84ba23749641",
+  "tables": {
+    "audit_logs": {
+      "name": "audit_logs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entity": {
+          "name": "entity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "before_json": {
+          "name": "before_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "after_json": {
+          "name": "after_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "audit_logs_tenant_created_idx": {
+          "name": "audit_logs_tenant_created_idx",
+          "columns": ["tenant_id", "created_at"],
+          "isUnique": false
+        },
+        "audit_logs_tenant_entity_idx": {
+          "name": "audit_logs_tenant_entity_idx",
+          "columns": ["tenant_id", "entity", "entity_id"],
+          "isUnique": false
+        },
+        "audit_logs_tenant_user_idx": {
+          "name": "audit_logs_tenant_user_idx",
+          "columns": ["tenant_id", "user_id"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "audit_logs_tenant_id_tenants_id_fk": {
+          "name": "audit_logs_tenant_id_tenants_id_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "audit_logs_tenant_branch_fk": {
+          "name": "audit_logs_tenant_branch_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "branches",
+          "columnsFrom": ["tenant_id", "branch_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "audit_logs_tenant_user_fk": {
+          "name": "audit_logs_tenant_user_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "users",
+          "columnsFrom": ["tenant_id", "user_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "branches": {
+      "name": "branches",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Asia/Jakarta'"
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "branches_uuid_unique": {
+          "name": "branches_uuid_unique",
+          "columns": ["uuid"],
+          "isUnique": true
+        },
+        "branches_tenant_code_unique": {
+          "name": "branches_tenant_code_unique",
+          "columns": ["tenant_id", "code"],
+          "isUnique": true
+        },
+        "branches_tenant_id_unique": {
+          "name": "branches_tenant_id_unique",
+          "columns": ["tenant_id", "id"],
+          "isUnique": true
+        },
+        "branches_tenant_status_idx": {
+          "name": "branches_tenant_status_idx",
+          "columns": ["tenant_id", "status"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "branches_tenant_id_tenants_id_fk": {
+          "name": "branches_tenant_id_tenants_id_fk",
+          "tableFrom": "branches",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "branches_status_check": {
+          "name": "branches_status_check",
+          "value": "\"branches\".\"status\" IN ('active', 'inactive')"
+        },
+        "branches_code_uppercase_check": {
+          "name": "branches_code_uppercase_check",
+          "value": "\"branches\".\"code\" = upper(\"branches\".\"code\")"
+        }
+      }
+    },
+    "locations": {
+      "name": "locations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "warehouse_id": {
+          "name": "warehouse_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'storage'"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "locations_uuid_unique": {
+          "name": "locations_uuid_unique",
+          "columns": ["uuid"],
+          "isUnique": true
+        },
+        "locations_tenant_warehouse_code_unique": {
+          "name": "locations_tenant_warehouse_code_unique",
+          "columns": ["tenant_id", "warehouse_id", "code"],
+          "isUnique": true
+        },
+        "locations_tenant_id_unique": {
+          "name": "locations_tenant_id_unique",
+          "columns": ["tenant_id", "id"],
+          "isUnique": true
+        },
+        "locations_tenant_warehouse_idx": {
+          "name": "locations_tenant_warehouse_idx",
+          "columns": ["tenant_id", "warehouse_id"],
+          "isUnique": false
+        },
+        "locations_tenant_status_idx": {
+          "name": "locations_tenant_status_idx",
+          "columns": ["tenant_id", "status"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "locations_tenant_warehouse_fk": {
+          "name": "locations_tenant_warehouse_fk",
+          "tableFrom": "locations",
+          "tableTo": "warehouses",
+          "columnsFrom": ["tenant_id", "warehouse_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "locations_type_check": {
+          "name": "locations_type_check",
+          "value": "\"locations\".\"type\" IN ('storage', 'sales_floor', 'receiving', 'quarantine', 'damaged', 'expired')"
+        },
+        "locations_status_check": {
+          "name": "locations_status_check",
+          "value": "\"locations\".\"status\" IN ('active', 'inactive')"
+        },
+        "locations_code_uppercase_check": {
+          "name": "locations_code_uppercase_check",
+          "value": "\"locations\".\"code\" = upper(\"locations\".\"code\")"
+        }
+      }
+    },
+    "login_history": {
+      "name": "login_history",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email_hash": {
+          "name": "email_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "success": {
+          "name": "success",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "failure_reason": {
+          "name": "failure_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "login_history_tenant_created_idx": {
+          "name": "login_history_tenant_created_idx",
+          "columns": ["tenant_id", "created_at"],
+          "isUnique": false
+        },
+        "login_history_tenant_user_idx": {
+          "name": "login_history_tenant_user_idx",
+          "columns": ["tenant_id", "user_id"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "login_history_tenant_id_tenants_id_fk": {
+          "name": "login_history_tenant_id_tenants_id_fk",
+          "tableFrom": "login_history",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "login_history_tenant_user_fk": {
+          "name": "login_history_tenant_user_fk",
+          "tableFrom": "login_history",
+          "tableTo": "users",
+          "columnsFrom": ["tenant_id", "user_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "permissions": {
+      "name": "permissions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "resource": {
+          "name": "resource",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "permissions_code_unique": {
+          "name": "permissions_code_unique",
+          "columns": ["code"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "pos_terminals": {
+      "name": "pos_terminals",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "pos_terminals_uuid_unique": {
+          "name": "pos_terminals_uuid_unique",
+          "columns": ["uuid"],
+          "isUnique": true
+        },
+        "pos_terminals_tenant_code_unique": {
+          "name": "pos_terminals_tenant_code_unique",
+          "columns": ["tenant_id", "code"],
+          "isUnique": true
+        },
+        "pos_terminals_tenant_id_unique": {
+          "name": "pos_terminals_tenant_id_unique",
+          "columns": ["tenant_id", "id"],
+          "isUnique": true
+        },
+        "pos_terminals_tenant_branch_idx": {
+          "name": "pos_terminals_tenant_branch_idx",
+          "columns": ["tenant_id", "branch_id"],
+          "isUnique": false
+        },
+        "pos_terminals_tenant_status_idx": {
+          "name": "pos_terminals_tenant_status_idx",
+          "columns": ["tenant_id", "status"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "pos_terminals_tenant_branch_fk": {
+          "name": "pos_terminals_tenant_branch_fk",
+          "tableFrom": "pos_terminals",
+          "tableTo": "branches",
+          "columnsFrom": ["tenant_id", "branch_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "pos_terminals_status_check": {
+          "name": "pos_terminals_status_check",
+          "value": "\"pos_terminals\".\"status\" IN ('active', 'inactive')"
+        },
+        "pos_terminals_code_uppercase_check": {
+          "name": "pos_terminals_code_uppercase_check",
+          "value": "\"pos_terminals\".\"code\" = upper(\"pos_terminals\".\"code\")"
+        }
+      }
+    },
+    "rate_limit_buckets": {
+      "name": "rate_limit_buckets",
+      "columns": {
+        "key_hash": {
+          "name": "key_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "request_count": {
+          "name": "request_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "window_started_at": {
+          "name": "window_started_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "rate_limit_buckets_tenant_category_idx": {
+          "name": "rate_limit_buckets_tenant_category_idx",
+          "columns": ["tenant_id", "category"],
+          "isUnique": false
+        },
+        "rate_limit_buckets_expiry_idx": {
+          "name": "rate_limit_buckets_expiry_idx",
+          "columns": ["expires_at"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "rate_limit_buckets_tenant_id_tenants_id_fk": {
+          "name": "rate_limit_buckets_tenant_id_tenants_id_fk",
+          "tableFrom": "rate_limit_buckets",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "rate_limit_buckets_count_check": {
+          "name": "rate_limit_buckets_count_check",
+          "value": "\"rate_limit_buckets\".\"request_count\" >= 0"
+        },
+        "rate_limit_buckets_window_check": {
+          "name": "rate_limit_buckets_window_check",
+          "value": "\"rate_limit_buckets\".\"expires_at\" > \"rate_limit_buckets\".\"window_started_at\""
+        }
+      }
+    },
+    "role_permissions": {
+      "name": "role_permissions",
+      "columns": {
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "permission_id": {
+          "name": "permission_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "role_permissions_permission_idx": {
+          "name": "role_permissions_permission_idx",
+          "columns": ["permission_id"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "role_permissions_permission_id_permissions_id_fk": {
+          "name": "role_permissions_permission_id_permissions_id_fk",
+          "tableFrom": "role_permissions",
+          "tableTo": "permissions",
+          "columnsFrom": ["permission_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "role_permissions_tenant_role_fk": {
+          "name": "role_permissions_tenant_role_fk",
+          "tableFrom": "role_permissions",
+          "tableTo": "roles",
+          "columnsFrom": ["tenant_id", "role_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "role_permissions_tenant_id_role_id_permission_id_pk": {
+          "columns": ["tenant_id", "role_id", "permission_id"],
+          "name": "role_permissions_tenant_id_role_id_permission_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "roles": {
+      "name": "roles",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_system": {
+          "name": "is_system",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "roles_uuid_unique": {
+          "name": "roles_uuid_unique",
+          "columns": ["uuid"],
+          "isUnique": true
+        },
+        "roles_tenant_code_unique": {
+          "name": "roles_tenant_code_unique",
+          "columns": ["tenant_id", "code"],
+          "isUnique": true
+        },
+        "roles_tenant_id_unique": {
+          "name": "roles_tenant_id_unique",
+          "columns": ["tenant_id", "id"],
+          "isUnique": true
+        },
+        "roles_tenant_active_idx": {
+          "name": "roles_tenant_active_idx",
+          "columns": ["tenant_id", "is_active"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "roles_tenant_id_tenants_id_fk": {
+          "name": "roles_tenant_id_tenants_id_fk",
+          "tableFrom": "roles",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "roles_code_lowercase_check": {
+          "name": "roles_code_lowercase_check",
+          "value": "\"roles\".\"code\" = lower(\"roles\".\"code\")"
+        }
+      }
+    },
+    "security_events": {
+      "name": "security_events",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "severity": {
+          "name": "severity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'warning'"
+        },
+        "metadata_json": {
+          "name": "metadata_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "security_events_tenant_created_idx": {
+          "name": "security_events_tenant_created_idx",
+          "columns": ["tenant_id", "created_at"],
+          "isUnique": false
+        },
+        "security_events_tenant_type_idx": {
+          "name": "security_events_tenant_type_idx",
+          "columns": ["tenant_id", "event_type"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "security_events_tenant_id_tenants_id_fk": {
+          "name": "security_events_tenant_id_tenants_id_fk",
+          "tableFrom": "security_events",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "security_events_tenant_user_fk": {
+          "name": "security_events_tenant_user_fk",
+          "tableFrom": "security_events",
+          "tableTo": "users",
+          "columnsFrom": ["tenant_id", "user_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sessions": {
+      "name": "sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "active_branch_id": {
+          "name": "active_branch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "sessions_uuid_unique": {
+          "name": "sessions_uuid_unique",
+          "columns": ["uuid"],
+          "isUnique": true
+        },
+        "sessions_token_hash_unique": {
+          "name": "sessions_token_hash_unique",
+          "columns": ["token_hash"],
+          "isUnique": true
+        },
+        "sessions_tenant_user_idx": {
+          "name": "sessions_tenant_user_idx",
+          "columns": ["tenant_id", "user_id"],
+          "isUnique": false
+        },
+        "sessions_expiry_idx": {
+          "name": "sessions_expiry_idx",
+          "columns": ["expires_at"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "sessions_tenant_user_fk": {
+          "name": "sessions_tenant_user_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "columnsFrom": ["tenant_id", "user_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "sessions_tenant_branch_fk": {
+          "name": "sessions_tenant_branch_fk",
+          "tableFrom": "sessions",
+          "tableTo": "branches",
+          "columnsFrom": ["tenant_id", "active_branch_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "tenant_domains": {
+      "name": "tenant_domains",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "hostname": {
+          "name": "hostname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_primary": {
+          "name": "is_primary",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "verified_at": {
+          "name": "verified_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "tenant_domains_hostname_unique": {
+          "name": "tenant_domains_hostname_unique",
+          "columns": ["hostname"],
+          "isUnique": true
+        },
+        "tenant_domains_tenant_idx": {
+          "name": "tenant_domains_tenant_idx",
+          "columns": ["tenant_id"],
+          "isUnique": false
+        },
+        "tenant_domains_verified_idx": {
+          "name": "tenant_domains_verified_idx",
+          "columns": ["verified_at"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tenant_domains_tenant_id_tenants_id_fk": {
+          "name": "tenant_domains_tenant_id_tenants_id_fk",
+          "tableFrom": "tenant_domains",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tenant_domains_hostname_lowercase_check": {
+          "name": "tenant_domains_hostname_lowercase_check",
+          "value": "\"tenant_domains\".\"hostname\" = lower(\"tenant_domains\".\"hostname\")"
+        }
+      }
+    },
+    "tenants": {
+      "name": "tenants",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "plan": {
+          "name": "plan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'starter'"
+        },
+        "business_type": {
+          "name": "business_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'retail'"
+        },
+        "ui_mode": {
+          "name": "ui_mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'simple'"
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Asia/Jakarta'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "tenants_uuid_unique": {
+          "name": "tenants_uuid_unique",
+          "columns": ["uuid"],
+          "isUnique": true
+        },
+        "tenants_slug_unique": {
+          "name": "tenants_slug_unique",
+          "columns": ["slug"],
+          "isUnique": true
+        },
+        "tenants_status_idx": {
+          "name": "tenants_status_idx",
+          "columns": ["status"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tenants_status_check": {
+          "name": "tenants_status_check",
+          "value": "\"tenants\".\"status\" IN ('pending', 'active', 'suspended', 'inactive')"
+        },
+        "tenants_business_type_check": {
+          "name": "tenants_business_type_check",
+          "value": "\"tenants\".\"business_type\" IN ('retail', 'pharmacy', 'retail_pharmacy')"
+        },
+        "tenants_ui_mode_check": {
+          "name": "tenants_ui_mode_check",
+          "value": "\"tenants\".\"ui_mode\" IN ('simple', 'professional', 'advanced')"
+        },
+        "tenants_slug_lowercase_check": {
+          "name": "tenants_slug_lowercase_check",
+          "value": "\"tenants\".\"slug\" = lower(\"tenants\".\"slug\")"
+        },
+        "tenants_slug_length_check": {
+          "name": "tenants_slug_length_check",
+          "value": "length(\"tenants\".\"slug\") BETWEEN 2 AND 63"
+        }
+      }
+    },
+    "user_branches": {
+      "name": "user_branches",
+      "columns": {
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_default": {
+          "name": "is_default",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "user_branches_tenant_user_idx": {
+          "name": "user_branches_tenant_user_idx",
+          "columns": ["tenant_id", "user_id"],
+          "isUnique": false
+        },
+        "user_branches_one_default_unique": {
+          "name": "user_branches_one_default_unique",
+          "columns": ["tenant_id", "user_id"],
+          "isUnique": true,
+          "where": "\"user_branches\".\"is_default\" = 1"
+        }
+      },
+      "foreignKeys": {
+        "user_branches_tenant_user_fk": {
+          "name": "user_branches_tenant_user_fk",
+          "tableFrom": "user_branches",
+          "tableTo": "users",
+          "columnsFrom": ["tenant_id", "user_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "user_branches_tenant_branch_fk": {
+          "name": "user_branches_tenant_branch_fk",
+          "tableFrom": "user_branches",
+          "tableTo": "branches",
+          "columnsFrom": ["tenant_id", "branch_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "user_branches_tenant_id_user_id_branch_id_pk": {
+          "columns": ["tenant_id", "user_id", "branch_id"],
+          "name": "user_branches_tenant_id_user_id_branch_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "user_roles": {
+      "name": "user_roles",
+      "columns": {
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "user_roles_tenant_user_idx": {
+          "name": "user_roles_tenant_user_idx",
+          "columns": ["tenant_id", "user_id"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "user_roles_tenant_user_fk": {
+          "name": "user_roles_tenant_user_fk",
+          "tableFrom": "user_roles",
+          "tableTo": "users",
+          "columnsFrom": ["tenant_id", "user_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "user_roles_tenant_role_fk": {
+          "name": "user_roles_tenant_role_fk",
+          "tableFrom": "user_roles",
+          "tableTo": "roles",
+          "columnsFrom": ["tenant_id", "role_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "user_roles_tenant_id_user_id_role_id_pk": {
+          "columns": ["tenant_id", "user_id", "role_id"],
+          "name": "user_roles_tenant_id_user_id_role_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'invited'"
+        },
+        "failed_login_attempts": {
+          "name": "failed_login_attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "locked_until": {
+          "name": "locked_until",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password_changed_at": {
+          "name": "password_changed_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_login_at": {
+          "name": "last_login_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "users_uuid_unique": {
+          "name": "users_uuid_unique",
+          "columns": ["uuid"],
+          "isUnique": true
+        },
+        "users_tenant_email_unique": {
+          "name": "users_tenant_email_unique",
+          "columns": ["tenant_id", "email"],
+          "isUnique": true
+        },
+        "users_tenant_id_unique": {
+          "name": "users_tenant_id_unique",
+          "columns": ["tenant_id", "id"],
+          "isUnique": true
+        },
+        "users_tenant_status_idx": {
+          "name": "users_tenant_status_idx",
+          "columns": ["tenant_id", "status"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "users_tenant_id_tenants_id_fk": {
+          "name": "users_tenant_id_tenants_id_fk",
+          "tableFrom": "users",
+          "tableTo": "tenants",
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "users_email_lowercase_check": {
+          "name": "users_email_lowercase_check",
+          "value": "\"users\".\"email\" = lower(\"users\".\"email\")"
+        },
+        "users_failed_login_attempts_check": {
+          "name": "users_failed_login_attempts_check",
+          "value": "\"users\".\"failed_login_attempts\" >= 0"
+        },
+        "users_status_check": {
+          "name": "users_status_check",
+          "value": "\"users\".\"status\" IN ('invited', 'active', 'disabled')"
+        }
+      }
+    },
+    "warehouses": {
+      "name": "warehouses",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "warehouses_uuid_unique": {
+          "name": "warehouses_uuid_unique",
+          "columns": ["uuid"],
+          "isUnique": true
+        },
+        "warehouses_tenant_code_unique": {
+          "name": "warehouses_tenant_code_unique",
+          "columns": ["tenant_id", "code"],
+          "isUnique": true
+        },
+        "warehouses_tenant_id_unique": {
+          "name": "warehouses_tenant_id_unique",
+          "columns": ["tenant_id", "id"],
+          "isUnique": true
+        },
+        "warehouses_tenant_branch_idx": {
+          "name": "warehouses_tenant_branch_idx",
+          "columns": ["tenant_id", "branch_id"],
+          "isUnique": false
+        },
+        "warehouses_tenant_status_idx": {
+          "name": "warehouses_tenant_status_idx",
+          "columns": ["tenant_id", "status"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "warehouses_tenant_branch_fk": {
+          "name": "warehouses_tenant_branch_fk",
+          "tableFrom": "warehouses",
+          "tableTo": "branches",
+          "columnsFrom": ["tenant_id", "branch_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "warehouses_status_check": {
+          "name": "warehouses_status_check",
+          "value": "\"warehouses\".\"status\" IN ('active', 'inactive')"
+        },
+        "warehouses_code_uppercase_check": {
+          "name": "warehouses_code_uppercase_check",
+          "value": "\"warehouses\".\"code\" = upper(\"warehouses\".\"code\")"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

@@ -58,13 +58,24 @@ Production-oriented multi-tenant POS foundation for retail and pharmacy operatio
 - `GET /api/v1/admin/security-events`
 - permission-adaptive administration UI for users, roles, and recent security events
 
+### Implemented — Phase 2 organization foundation (in progress)
+
+- tenant-scoped branch, warehouse, rack/location, and POS-terminal resources
+- composite tenant/parent foreign keys and tenant-safe public UUID references
+- active/inactive lifecycle controls with protected last-active branch
+- parent/child lifecycle rules for branches, warehouses, locations, and terminals
+- typed inventory locations for storage, sales floor, receiving, quarantine, damaged, and expired stock
+- audited create/update operations protected by `settings.manage` and distributed rate limits
+- organization APIs under `/api/v1/admin/organization`
+- adaptive organization UI for hierarchy visibility, creation, and lifecycle changes
+
 ### Tested and verified
 
 Run `npm run validate` to reproduce all local quality gates, including applying every migration to an isolated D1 database.
 
 ### Not implemented yet
 
-Phase 2 organization and master-data modules have not been implemented yet. No business feature is represented as complete before its backend, authorization, UI, migrations where needed, and tests exist.
+Remaining Phase 2 work includes tenant settings plus category, brand, unit, product, product-unit, price, supplier, and customer modules. No business feature is represented as complete before its backend, authorization, UI, migrations where needed, and tests exist.
 
 ## Repository layout
 

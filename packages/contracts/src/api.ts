@@ -144,6 +144,53 @@ export interface SecurityEventListData {
   readonly events: readonly SecurityEventData[];
 }
 
+export type OrganizationStatus = 'active' | 'inactive';
+export type LocationType =
+  'storage' | 'sales_floor' | 'receiving' | 'quarantine' | 'damaged' | 'expired';
+
+export interface OrganizationBranchData {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly status: OrganizationStatus;
+  readonly timezone: string;
+  readonly address: string | null;
+}
+
+export interface WarehouseData {
+  readonly id: string;
+  readonly branchId: string;
+  readonly code: string;
+  readonly name: string;
+  readonly status: OrganizationStatus;
+  readonly address: string | null;
+}
+
+export interface LocationData {
+  readonly id: string;
+  readonly warehouseId: string;
+  readonly code: string;
+  readonly name: string;
+  readonly type: LocationType;
+  readonly status: OrganizationStatus;
+}
+
+export interface PosTerminalData {
+  readonly id: string;
+  readonly branchId: string;
+  readonly code: string;
+  readonly name: string;
+  readonly status: OrganizationStatus;
+  readonly lastSeenAt: string | null;
+}
+
+export interface OrganizationDirectoryData {
+  readonly branches: readonly OrganizationBranchData[];
+  readonly warehouses: readonly WarehouseData[];
+  readonly locations: readonly LocationData[];
+  readonly terminals: readonly PosTerminalData[];
+}
+
 export interface HealthData {
   readonly status: 'ok';
   readonly environment: 'development' | 'staging' | 'production' | 'test';

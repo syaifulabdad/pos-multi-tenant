@@ -9,6 +9,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 
 import { getJson, patchJson, postJson } from '../lib/api';
+import { OrganizationPanel } from './OrganizationPanel';
 
 interface AdminPanelProperties {
   readonly permissions: readonly string[];
@@ -439,6 +440,7 @@ export function AdminPanel({ permissions, currentUserId }: AdminPanelProperties)
     <div className="mt-8 grid items-start gap-5 lg:grid-cols-2">
       {canManageUsers ? <UsersPanel currentUserId={currentUserId} /> : null}
       {canManageRoles ? <RolesPanel /> : null}
+      {canViewSecurity ? <OrganizationPanel /> : null}
       {canViewSecurity ? <SecurityEventsPanel /> : null}
     </div>
   );
