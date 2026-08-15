@@ -57,14 +57,17 @@ export function patchJson<T>(path: string, body: unknown): Promise<T> {
   });
 }
 
-export function postJson<T>(path: string, body?: unknown): Promise<T> {
+export function postJson<T>(
+  path: string,
+  body?: unknown,
+  headers: Readonly<Record<string, string>> = {},
+): Promise<T> {
   return requestJson(path, {
     method: 'POST',
-    ...(body === undefined
-      ? {}
-      : {
-          body: JSON.stringify(body),
-          headers: { 'Content-Type': 'application/json' },
-        }),
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    headers: {
+      ...headers,
+      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+    },
   });
 }

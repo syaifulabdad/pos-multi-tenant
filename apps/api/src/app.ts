@@ -5,6 +5,7 @@ import { errorResponse } from './lib/responses';
 import {
   createAccessRepository,
   loadAccessContext,
+  requireBranch,
   requirePermission,
   requirePermissionByMethod,
   type AccessRepositoryFactory,
@@ -35,6 +36,11 @@ import {
 } from './modules/admin/tenant-settings';
 import { createAuthRoutes } from './modules/auth/routes';
 import { healthRoutes } from './modules/health/routes';
+import {
+  createInventoryRepository,
+  createInventoryRoutes,
+  type InventoryRepositoryFactory,
+} from './modules/inventory/routes';
 import {
   createMasterRepository,
   createMasterRoutes,
@@ -69,6 +75,10 @@ const ADMIN_RATE_LIMITS = [
   { scope: 'user', limit: 120, windowSeconds: 60 },
   { scope: 'tenant', limit: 2_000, windowSeconds: 60 },
 ] as const;
+const INVENTORY_RATE_LIMITS = [
+  { scope: 'user', limit: 300, windowSeconds: 60 },
+  { scope: 'tenant', limit: 5_000, windowSeconds: 60 },
+] as const;
 
 export interface AppDependencies {
   readonly tenantRepositoryFactory?: TenantRepositoryFactory;
@@ -76,6 +86,7 @@ export interface AppDependencies {
   readonly accessRepositoryFactory?: AccessRepositoryFactory;
   readonly adminRepositoryFactory?: AdminRepositoryFactory;
   readonly tenantSettingsRepositoryFactory?: TenantSettingsRepositoryFactory;
+  readonly inventoryRepositoryFactory?: InventoryRepositoryFactory;
   readonly masterRepositoryFactory?: MasterRepositoryFactory;
   readonly organizationRepositoryFactory?: OrganizationRepositoryFactory;
   readonly rateLimitRepositoryFactory?: RateLimitRepositoryFactory;
@@ -89,6 +100,8 @@ export function createApp(dependencies: AppDependencies = {}) {
   const adminRepositoryFactory = dependencies.adminRepositoryFactory ?? createAdminRepository;
   const tenantSettingsRepositoryFactory =
     dependencies.tenantSettingsRepositoryFactory ?? createTenantSettingsRepository;
+  const inventoryRepositoryFactory =
+    dependencies.inventoryRepositoryFactory ?? createInventoryRepository;
   const masterRepositoryFactory = dependencies.masterRepositoryFactory ?? createMasterRepository;
   const organizationRepositoryFactory =
     dependencies.organizationRepositoryFactory ?? createOrganizationRepository;
@@ -103,6 +116,8 @@ export function createApp(dependencies: AppDependencies = {}) {
   application.use('/api/v1/auth/*', tenantResolver(dependencies.tenantRepositoryFactory));
   application.use('/api/v1/access/*', tenantResolver(dependencies.tenantRepositoryFactory));
   application.use('/api/v1/admin/*', tenantResolver(dependencies.tenantRepositoryFactory));
+  application.use('/api/v1/inventory', tenantResolver(dependencies.tenantRepositoryFactory));
+  application.use('/api/v1/inventory/*', tenantResolver(dependencies.tenantRepositoryFactory));
   application.use('/api/v1/master', tenantResolver(dependencies.tenantRepositoryFactory));
   application.use('/api/v1/master/*', tenantResolver(dependencies.tenantRepositoryFactory));
   application.use(
@@ -115,6 +130,8 @@ export function createApp(dependencies: AppDependencies = {}) {
   application.use('/api/v1/auth/sessions/*', authenticateSession(authRepositoryFactory));
   application.use('/api/v1/access/*', authenticateSession(authRepositoryFactory));
   application.use('/api/v1/admin/*', authenticateSession(authRepositoryFactory));
+  application.use('/api/v1/inventory', authenticateSession(authRepositoryFactory));
+  application.use('/api/v1/inventory/*', authenticateSession(authRepositoryFactory));
   application.use('/api/v1/master', authenticateSession(authRepositoryFactory));
   application.use('/api/v1/master/*', authenticateSession(authRepositoryFactory));
   application.use(
@@ -134,6 +151,14 @@ export function createApp(dependencies: AppDependencies = {}) {
     rateLimit('admin.manage', ADMIN_RATE_LIMITS, rateLimitRepositoryFactory),
   );
   application.use(
+    '/api/v1/inventory',
+    rateLimit('inventory.manage', INVENTORY_RATE_LIMITS, rateLimitRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/inventory/*',
+    rateLimit('inventory.manage', INVENTORY_RATE_LIMITS, rateLimitRepositoryFactory),
+  );
+  application.use(
     '/api/v1/master',
     rateLimit('master.manage', ADMIN_RATE_LIMITS, rateLimitRepositoryFactory),
   );
@@ -143,6 +168,10 @@ export function createApp(dependencies: AppDependencies = {}) {
   );
   application.use('/api/v1/access/*', loadAccessContext(accessRepositoryFactory));
   application.use('/api/v1/admin/*', loadAccessContext(accessRepositoryFactory));
+  application.use('/api/v1/inventory', loadAccessContext(accessRepositoryFactory));
+  application.use('/api/v1/inventory/*', loadAccessContext(accessRepositoryFactory));
+  application.use('/api/v1/inventory', requireBranch);
+  application.use('/api/v1/inventory/*', requireBranch);
   application.use('/api/v1/master', loadAccessContext(accessRepositoryFactory));
   application.use('/api/v1/master/*', loadAccessContext(accessRepositoryFactory));
   application.use(
@@ -174,6 +203,30 @@ export function createApp(dependencies: AppDependencies = {}) {
   application.use(
     '/api/v1/admin/tenant',
     requirePermission('settings.manage', accessRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/inventory/directory',
+    requirePermission('stock.view', accessRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/inventory/batches',
+    requirePermission('stock.adjust', accessRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/inventory/adjustments',
+    requirePermission('stock.adjust', accessRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/inventory/reservations',
+    requirePermissionByMethod({ POST: 'sales.create' }, accessRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/inventory/reservations/:id/release',
+    requirePermission('sales.create', accessRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/inventory/reservations/expire',
+    requirePermission('stock.adjust', accessRepositoryFactory),
   );
   application.use(
     '/api/v1/master/directory',
@@ -230,6 +283,7 @@ export function createApp(dependencies: AppDependencies = {}) {
     '/api/v1/admin/organization',
     createOrganizationRoutes(organizationRepositoryFactory),
   );
+  application.route('/api/v1/inventory', createInventoryRoutes(inventoryRepositoryFactory));
   application.route('/api/v1/master', createMasterRoutes(masterRepositoryFactory));
 
   application.notFound((context) => {

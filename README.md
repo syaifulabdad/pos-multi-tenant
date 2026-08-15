@@ -78,17 +78,33 @@ Production-oriented multi-tenant POS foundation for retail and pharmacy operatio
 - master directory and mutation APIs under `/api/v1/master`
 - responsive, permission-adaptive tenant settings, organization, product, pricing, supplier, and customer UI
 
+### Implemented — Phase 3 inventory engine
+
+- tenant- and active-branch-scoped batches, stock balances, reservations, reservation allocations, and append-only stock movements
+- integer minor-quantity storage with exact rational conversion from public decimal quantities and product-unit ratios
+- atomic D1 batches for balance changes, immutable ledger entries, reservation state, and audit records
+- conditional balance updates that prevent negative stock and keep reserved quantity at or below on-hand quantity under concurrent writes
+- idempotent stock adjustments keyed by a hashed, tenant-scoped `Idempotency-Key`
+- server-side FEFO allocation for expiry-tracked products and FIFO allocation for other stock
+- inactive-location, blocked-batch, depleted-balance, and expired-batch exclusion from availability
+- explicit reservation release and bounded expiry-sweep operations
+- composite tenant/product/branch/warehouse/location foreign keys that reject cross-tenant or cross-branch inventory relations
+- UUID-only inventory APIs under `/api/v1/inventory`
+- authenticated, branch-required, permission-protected, distributed-rate-limited inventory operations
+- responsive inventory dashboard with permission-adaptive batch, adjustment, reservation, release, and expiry controls
+- service, HTTP, repository SQL-shape, concurrency, tenant-isolation, invariant, and migration-upgrade coverage
+
 ### Tested and verified
 
-Run `npm run validate` to reproduce all local quality gates, including applying every migration to an isolated D1 database.
+Run `npm run validate` to reproduce all local quality gates, including applying every migration to an isolated D1 database and exercising a populated upgrade path.
 
 ### Not implemented yet
 
-Phase 3 is next: batches, immutable stock ledger, availability, reservations, server-side FEFO/FIFO allocation, expiry, and stock adjustments. Purchasing, POS, finance, pharmacy, platform operations, and later roadmap phases remain intentionally unimplemented until their prerequisite domain phases are complete. No business feature is represented as complete before its backend, authorization, UI, migrations where needed, and tests exist.
+Phase 4 purchasing is next. POS, returns, finance, pharmacy, platform operations, integrations, and later roadmap phases remain intentionally unimplemented until their prerequisite domain phases are complete. No business feature is represented as complete before its backend, authorization, UI, migrations where needed, and tests exist.
 
-## Phase 2 API and permissions
+## Phase 2 and 3 API permissions
 
-All tenant identity is derived from the request hostname. Request bodies and public routes use UUIDs; internal integer IDs never form part of the public contract.
+All tenant identity is derived from the request hostname. Request bodies and public routes use UUIDs; internal integer IDs never form part of the public contract. Inventory routes additionally require an authorized active branch.
 
 | Surface                                                      | Permission        |
 | ------------------------------------------------------------ | ----------------- |
@@ -99,8 +115,13 @@ All tenant identity is derived from the request hostname. Request bodies and pub
 | Update catalog resources or create a new price-history row   | `product.update`  |
 | Create or update suppliers                                   | `purchase.create` |
 | Create or update customers                                   | `sales.create`    |
+| `GET /api/v1/inventory/directory`                            | `stock.view`      |
+| `POST /api/v1/inventory/batches`                             | `stock.adjust`    |
+| `POST /api/v1/inventory/adjustments`                         | `stock.adjust`    |
+| Create or release a stock reservation                        | `sales.create`    |
+| `POST /api/v1/inventory/reservations/expire`                 | `stock.adjust`    |
 
-Master and settings mutations also pass through the authenticated administration rate-limit class. UI visibility follows effective permissions, but the Worker independently enforces every operation.
+Master, settings, and inventory mutations also pass through authenticated distributed rate-limit classes. UI visibility follows effective permissions, but the Worker independently enforces every operation.
 
 ## Repository layout
 

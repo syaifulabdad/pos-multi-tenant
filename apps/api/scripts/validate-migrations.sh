@@ -88,6 +88,12 @@ wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --command 
   VALUES (2, '0198c000-0000-7000-8000-000000000020', 2, 'OTHER', 'Other Category');
   INSERT INTO units (id, uuid, tenant_id, code, name, symbol, precision)
   VALUES (2, '0198c000-0000-7000-8000-000000000021', 2, 'OTHER', 'Other Unit', 'o', 0);
+  INSERT INTO products (id, uuid, tenant_id, base_unit_id, sku, name)
+  VALUES (2, '0198c000-0000-7000-8000-000000000025', 2, 2, 'OTHERSKU', 'Other Product');
+  INSERT INTO product_units (id, uuid, tenant_id, product_id, unit_id, is_base)
+  VALUES (2, '0198c000-0000-7000-8000-000000000026', 2, 2, 2, 1);
+  INSERT INTO suppliers (id, uuid, tenant_id, code, name)
+  VALUES (2, '0198c000-0000-7000-8000-000000000027', 2, 'OTHERSUP', 'Other Supplier');
 "
 
 if wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --command "
@@ -116,6 +122,66 @@ if wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --comma
   exit 1
 fi
 
+wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --file migrations/0006_wandering_northstar.sql
+wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --command "
+  INSERT INTO inventory_batches
+    (id, uuid, tenant_id, product_id, supplier_id, batch_number, received_at,
+     expires_at, unit_cost_minor, created_by)
+  VALUES
+    (1, '0198c000-0000-7000-8000-000000000028', 1, 1, 1, 'BATCH01',
+     '2026-08-01T00:00:00.000Z', '2027-08-01T00:00:00.000Z', 9000, 1);
+  INSERT INTO inventory_balances
+    (id, tenant_id, branch_id, warehouse_id, location_id, product_id, batch_id,
+     batch_key, on_hand_minor, reserved_minor)
+  VALUES (1, 1, 1, 1, 1, 1, 1, '1', 10, 3);
+  INSERT INTO stock_movements
+    (id, uuid, tenant_id, branch_id, warehouse_id, location_id, product_id,
+     batch_id, batch_key, type, quantity_minor, balance_after_minor,
+     reserved_after_minor, reason, reference_type, reference_uuid, created_by)
+  VALUES
+    (1, '0198c000-0000-7000-8000-000000000029', 1, 1, 1, 1, 1, 1, '1',
+     'opening', 10, 10, 3, 'Migration opening stock', 'opening',
+     'migration-opening-reference', 1);
+  INSERT INTO inventory_reservations
+    (id, uuid, tenant_id, branch_id, product_id, requested_minor, status,
+     expires_at, created_by)
+  VALUES
+    (1, '0198c000-0000-7000-8000-000000000030', 1, 1, 1, 3, 'active',
+     '2026-08-15T08:15:00.000Z', 1);
+  INSERT INTO inventory_reservation_items
+    (id, tenant_id, reservation_id, branch_id, warehouse_id, location_id,
+     product_id, batch_id, batch_key, quantity_minor)
+  VALUES (1, 1, 1, 1, 1, 1, 1, 1, '1', 3);
+"
+
+if wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --command "
+  INSERT INTO inventory_batches
+    (uuid, tenant_id, product_id, supplier_id, batch_number, received_at, created_by)
+  VALUES
+    ('0198c000-0000-7000-8000-000000000031', 1, 1, 2, 'CROSSSUP',
+     '2026-08-01T00:00:00.000Z', 1);
+" >/dev/null 2>&1; then
+  echo "Cross-tenant inventory batch/supplier foreign key was not enforced." >&2
+  exit 1
+fi
+
+if wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --command "
+  INSERT INTO inventory_balances
+    (tenant_id, branch_id, warehouse_id, location_id, product_id, batch_id,
+     batch_key, on_hand_minor)
+  VALUES (1, 2, 1, 1, 1, 1, '1', 1);
+" >/dev/null 2>&1; then
+  echo "Cross-tenant inventory branch foreign key was not enforced." >&2
+  exit 1
+fi
+
+if wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --command "
+  UPDATE inventory_balances SET on_hand_minor = 2 WHERE tenant_id = 1 AND id = 1;
+" >/dev/null 2>&1; then
+  echo "Reserved inventory was allowed to exceed on-hand stock." >&2
+  exit 1
+fi
+
 RESULT="$(wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" --command "
   SELECT CASE
     WHEN (SELECT count(*) FROM sessions WHERE id = 1 AND active_branch_id IS NULL) = 1
@@ -133,6 +199,11 @@ RESULT="$(wrangler d1 execute "$DATABASE" --local --persist-to "$UPGRADE_STATE" 
      AND (SELECT count(*) FROM product_prices WHERE tenant_id = 1 AND branch_id = 1) = 1
      AND (SELECT count(*) FROM suppliers WHERE tenant_id = 1 AND id = 1) = 1
      AND (SELECT count(*) FROM customers WHERE tenant_id = 1 AND id = 1) = 1
+     AND (SELECT count(*) FROM inventory_batches WHERE tenant_id = 1 AND product_id = 1) = 1
+     AND (SELECT on_hand_minor - reserved_minor FROM inventory_balances WHERE tenant_id = 1 AND id = 1) = 7
+     AND (SELECT count(*) FROM stock_movements WHERE tenant_id = 1 AND branch_id = 1) = 1
+     AND (SELECT count(*) FROM inventory_reservations WHERE tenant_id = 1 AND status = 'active') = 1
+     AND (SELECT count(*) FROM inventory_reservation_items WHERE tenant_id = 1 AND reservation_id = 1) = 1
     THEN 'ok' ELSE 'failed'
   END AS migration_upgrade;
 ")"

@@ -10,6 +10,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 
 import { getJson, patchJson, postJson } from '../lib/api';
+import { InventoryPanel } from './InventoryPanel';
 import { MasterDataPanel } from './MasterDataPanel';
 import { OrganizationPanel } from './OrganizationPanel';
 import { TenantSettingsPanel } from './TenantSettingsPanel';
@@ -439,7 +440,15 @@ export function AdminPanel({ permissions, currentUserId, tenant }: AdminPanelPro
   const canManageRoles = permissions.includes('role.manage');
   const canManageSettings = permissions.includes('settings.manage');
   const canViewMaster = permissions.includes('product.view');
-  if (!canManageUsers && !canManageRoles && !canManageSettings && !canViewMaster) return null;
+  const canViewInventory = permissions.includes('stock.view');
+  if (
+    !canManageUsers &&
+    !canManageRoles &&
+    !canManageSettings &&
+    !canViewMaster &&
+    !canViewInventory
+  )
+    return null;
 
   return (
     <div className="mt-8 grid items-start gap-5 lg:grid-cols-2">
@@ -448,6 +457,7 @@ export function AdminPanel({ permissions, currentUserId, tenant }: AdminPanelPro
       {canManageRoles ? <RolesPanel /> : null}
       {canManageSettings ? <OrganizationPanel /> : null}
       {canViewMaster ? <MasterDataPanel permissions={permissions} /> : null}
+      {canViewInventory ? <InventoryPanel permissions={permissions} /> : null}
       {canManageSettings ? <SecurityEventsPanel /> : null}
     </div>
   );

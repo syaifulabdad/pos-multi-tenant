@@ -295,6 +295,105 @@ export interface MasterDirectoryData {
   readonly branches: readonly AdminBranchSummaryData[];
 }
 
+export type InventoryBatchStatus = 'available' | 'quarantine' | 'depleted' | 'blocked';
+export type InventoryBatchEffectiveStatus = InventoryBatchStatus | 'expired';
+export type ReservationStatus = 'active' | 'released' | 'consumed' | 'expired';
+export type StockMovementType =
+  | 'opening'
+  | 'adjustment_in'
+  | 'adjustment_out'
+  | 'receipt'
+  | 'sale'
+  | 'sale_return'
+  | 'purchase_return'
+  | 'transfer_in'
+  | 'transfer_out'
+  | 'opname_in'
+  | 'opname_out';
+
+export interface InventoryProductData {
+  readonly id: string;
+  readonly sku: string;
+  readonly name: string;
+  readonly productUnitId: string;
+  readonly baseUnitId: string;
+  readonly unitSymbol: string;
+  readonly precision: number;
+  readonly trackBatches: boolean;
+  readonly trackExpiry: boolean;
+}
+
+export interface InventoryLocationData {
+  readonly id: string;
+  readonly warehouseId: string;
+  readonly warehouseCode: string;
+  readonly code: string;
+  readonly name: string;
+  readonly type: LocationType;
+}
+
+export interface InventoryBatchData {
+  readonly id: string;
+  readonly productId: string;
+  readonly supplierId: string | null;
+  readonly batchNumber: string | null;
+  readonly receivedAt: string;
+  readonly manufacturedAt: string | null;
+  readonly expiresAt: string | null;
+  readonly unitCostMinor: number;
+  readonly currency: string;
+  readonly status: InventoryBatchStatus;
+  readonly effectiveStatus: InventoryBatchEffectiveStatus;
+}
+
+export interface InventoryBalanceData {
+  readonly productId: string;
+  readonly locationId: string;
+  readonly batchId: string | null;
+  readonly onHand: string;
+  readonly reserved: string;
+  readonly available: string;
+}
+
+export interface StockMovementData {
+  readonly id: string;
+  readonly productId: string;
+  readonly locationId: string;
+  readonly batchId: string | null;
+  readonly type: StockMovementType;
+  readonly quantity: string;
+  readonly balanceAfter: string;
+  readonly reservedAfter: string;
+  readonly reason: string;
+  readonly referenceType: string;
+  readonly referenceId: string;
+  readonly createdAt: string;
+}
+
+export interface ReservationAllocationData {
+  readonly locationId: string;
+  readonly batchId: string | null;
+  readonly quantity: string;
+}
+
+export interface InventoryReservationData {
+  readonly id: string;
+  readonly productId: string;
+  readonly quantity: string;
+  readonly status: ReservationStatus;
+  readonly expiresAt: string;
+  readonly allocations: readonly ReservationAllocationData[];
+}
+
+export interface InventoryDirectoryData {
+  readonly products: readonly InventoryProductData[];
+  readonly locations: readonly InventoryLocationData[];
+  readonly batches: readonly InventoryBatchData[];
+  readonly balances: readonly InventoryBalanceData[];
+  readonly movements: readonly StockMovementData[];
+  readonly reservations: readonly InventoryReservationData[];
+}
+
 export interface TenantSettingsData {
   readonly id: string;
   readonly slug: string;

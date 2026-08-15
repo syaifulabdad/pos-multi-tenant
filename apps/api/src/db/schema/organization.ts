@@ -77,6 +77,7 @@ export const warehouses = sqliteTable(
     uniqueIndex('warehouses_uuid_unique').on(table.uuid),
     uniqueIndex('warehouses_tenant_code_unique').on(table.tenantId, table.code),
     uniqueIndex('warehouses_tenant_id_unique').on(table.tenantId, table.id),
+    uniqueIndex('warehouses_tenant_branch_id_unique').on(table.tenantId, table.branchId, table.id),
     index('warehouses_tenant_branch_idx').on(table.tenantId, table.branchId),
     index('warehouses_tenant_status_idx').on(table.tenantId, table.status),
     foreignKey({
@@ -113,6 +114,11 @@ export const locations = sqliteTable(
       table.code,
     ),
     uniqueIndex('locations_tenant_id_unique').on(table.tenantId, table.id),
+    uniqueIndex('locations_tenant_warehouse_id_unique').on(
+      table.tenantId,
+      table.warehouseId,
+      table.id,
+    ),
     index('locations_tenant_warehouse_idx').on(table.tenantId, table.warehouseId),
     index('locations_tenant_status_idx').on(table.tenantId, table.status),
     foreignKey({

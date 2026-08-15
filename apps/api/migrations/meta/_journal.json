@@ -43,6 +43,13 @@
       "when": 1786810113462,
       "tag": "0005_ancient_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1786811558529,
+      "tag": "0006_wandering_northstar",
+      "breakpoints": true
     }
   ]
 }
