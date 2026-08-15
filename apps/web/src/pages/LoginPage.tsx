@@ -54,7 +54,13 @@ function TenantUnavailable({ error }: { readonly error: Error | null }) {
   );
 }
 
-function LoginSuccess({ result }: { readonly result: LoginData }) {
+function LoginSuccess({
+  result,
+  tenant,
+}: {
+  readonly result: LoginData;
+  readonly tenant: TenantBootstrapData;
+}) {
   const access = useQuery({
     queryKey: ['access-context'],
     queryFn: ({ signal }) => getJson<AccessContextData>('/api/v1/access', signal),
@@ -224,7 +230,11 @@ function LoginSuccess({ result }: { readonly result: LoginData }) {
         </div>
       </div>
       {access.data === undefined ? null : (
-        <AdminPanel permissions={access.data.permissions} currentUserId={result.user.id} />
+        <AdminPanel
+          permissions={access.data.permissions}
+          currentUserId={result.user.id}
+          tenant={tenant}
+        />
       )}
     </div>
   );
@@ -261,8 +271,10 @@ function LoginForm({ tenant }: { readonly tenant: TenantBootstrapData }) {
       </div>
     );
   }
-  if (login.isSuccess) return <LoginSuccess result={login.data} />;
-  if (existingSession.isSuccess) return <LoginSuccess result={existingSession.data} />;
+  if (login.isSuccess) return <LoginSuccess result={login.data} tenant={tenant} />;
+  if (existingSession.isSuccess) {
+    return <LoginSuccess result={existingSession.data} tenant={tenant} />;
+  }
 
   const requestId = login.error instanceof ApiClientError ? login.error.requestId : undefined;
 

@@ -2,6 +2,22 @@ export { auditLogs, securityEvents } from './audit';
 export { permissions, rolePermissions, roles, userBranches, userRoles } from './authorization';
 export { USER_STATUSES, loginHistory, sessions, users, type UserStatus } from './identity';
 export {
+  CUSTOMER_TYPES,
+  MASTER_STATUSES,
+  PRODUCT_TYPES,
+  brands,
+  categories,
+  customers,
+  productPrices,
+  productUnits,
+  products,
+  suppliers,
+  units,
+  type CustomerType,
+  type MasterStatus,
+  type ProductType,
+} from './master';
+export {
   BRANCH_STATUSES,
   LOCATION_TYPES,
   branches,

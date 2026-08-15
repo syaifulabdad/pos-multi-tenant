@@ -1,3 +1,4 @@
+import type { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
 
 import { clientMetadata } from '../modules/auth/http';
@@ -34,28 +35,48 @@ export function loadAccessContext(
   });
 }
 
+async function enforcePermission(
+  context: Context<AppBindings>,
+  permission: string,
+  repositoryFactory: AccessRepositoryFactory,
+): Promise<void> {
+  if (context.get('permissions').includes(permission)) return;
+
+  const tenant = context.get('tenant');
+  const user = context.get('user');
+  if (tenant !== null && user !== null) {
+    await repositoryFactory(context.env).recordPermissionDenied({
+      tenantId: tenant.id,
+      userId: user.id,
+      branchId: context.get('branch')?.id ?? null,
+      permission,
+      requestId: context.get('requestId'),
+      route: context.req.path,
+      ...clientMetadata(context),
+    });
+  }
+  throw new PermissionDeniedError();
+}
+
 export function requirePermission(
   permission: string,
   repositoryFactory: AccessRepositoryFactory = createAccessRepository,
 ) {
   return createMiddleware<AppBindings>(async (context, next) => {
-    if (!context.get('permissions').includes(permission)) {
-      const tenant = context.get('tenant');
-      const user = context.get('user');
-      if (tenant !== null && user !== null) {
-        await repositoryFactory(context.env).recordPermissionDenied({
-          tenantId: tenant.id,
-          userId: user.id,
-          branchId: context.get('branch')?.id ?? null,
-          permission,
-          requestId: context.get('requestId'),
-          route: context.req.path,
-          ...clientMetadata(context),
-        });
-      }
-      throw new PermissionDeniedError();
-    }
+    await enforcePermission(context, permission, repositoryFactory);
+    await next();
+  });
+}
 
+export function requirePermissionByMethod(
+  permissions: Readonly<Record<string, string>>,
+  repositoryFactory: AccessRepositoryFactory = createAccessRepository,
+) {
+  return createMiddleware<AppBindings>(async (context, next) => {
+    const permission = permissions[context.req.method];
+    if (permission !== undefined) {
+      await enforcePermission(context, permission, repositoryFactory);
+    }
     await next();
   });
 }

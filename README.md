@@ -58,16 +58,25 @@ Production-oriented multi-tenant POS foundation for retail and pharmacy operatio
 - `GET /api/v1/admin/security-events`
 - permission-adaptive administration UI for users, roles, and recent security events
 
-### Implemented — Phase 2 organization foundation (in progress)
+### Implemented — Phase 2 organization and master data
 
 - tenant-scoped branch, warehouse, rack/location, and POS-terminal resources
 - composite tenant/parent foreign keys and tenant-safe public UUID references
-- active/inactive lifecycle controls with protected last-active branch
-- parent/child lifecycle rules for branches, warehouses, locations, and terminals
+- active/inactive lifecycle controls with protected parents and last-active branch
 - typed inventory locations for storage, sales floor, receiving, quarantine, damaged, and expired stock
-- audited create/update operations protected by `settings.manage` and distributed rate limits
+- audited organization operations protected by `settings.manage` and distributed rate limits
 - organization APIs under `/api/v1/admin/organization`
-- adaptive organization UI for hierarchy visibility, creation, and lifecycle changes
+- tenant presentation settings for name, business type, UI mode, timezone, with slug and plan kept immutable
+- tenant-scoped category hierarchies, brands, and precision-aware units
+- stock and service products with batch/expiry invariants and decimal-quantity compatibility
+- rational multi-unit conversions normalized server-side and protected immutable base units
+- globally or branch-scoped append-only price history using safe integer minor currency units
+- tenant-scoped suppliers and customers, with customer identity kept separate from future loyalty ledgers
+- UUID-only public master APIs with tenant-local reference resolution and cross-tenant composite foreign keys
+- audited mutations in the same D1 batch as their state changes
+- explicit `product.view`, `product.create`, `product.update`, `purchase.create`, `sales.create`, and `settings.manage` authorization
+- master directory and mutation APIs under `/api/v1/master`
+- responsive, permission-adaptive tenant settings, organization, product, pricing, supplier, and customer UI
 
 ### Tested and verified
 
@@ -75,7 +84,23 @@ Run `npm run validate` to reproduce all local quality gates, including applying 
 
 ### Not implemented yet
 
-Remaining Phase 2 work includes tenant settings plus category, brand, unit, product, product-unit, price, supplier, and customer modules. No business feature is represented as complete before its backend, authorization, UI, migrations where needed, and tests exist.
+Phase 3 is next: batches, immutable stock ledger, availability, reservations, server-side FEFO/FIFO allocation, expiry, and stock adjustments. Purchasing, POS, finance, pharmacy, platform operations, and later roadmap phases remain intentionally unimplemented until their prerequisite domain phases are complete. No business feature is represented as complete before its backend, authorization, UI, migrations where needed, and tests exist.
+
+## Phase 2 API and permissions
+
+All tenant identity is derived from the request hostname. Request bodies and public routes use UUIDs; internal integer IDs never form part of the public contract.
+
+| Surface                                                      | Permission        |
+| ------------------------------------------------------------ | ----------------- |
+| `PATCH /api/v1/admin/tenant`                                 | `settings.manage` |
+| `/api/v1/admin/organization/*`                               | `settings.manage` |
+| `GET /api/v1/master/directory`                               | `product.view`    |
+| Create categories, brands, units, products, or product units | `product.create`  |
+| Update catalog resources or create a new price-history row   | `product.update`  |
+| Create or update suppliers                                   | `purchase.create` |
+| Create or update customers                                   | `sales.create`    |
+
+Master and settings mutations also pass through the authenticated administration rate-limit class. UI visibility follows effective permissions, but the Worker independently enforces every operation.
 
 ## Repository layout
 

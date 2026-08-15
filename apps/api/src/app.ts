@@ -6,6 +6,7 @@ import {
   createAccessRepository,
   loadAccessContext,
   requirePermission,
+  requirePermissionByMethod,
   type AccessRepositoryFactory,
 } from './middleware/access';
 import {
@@ -27,8 +28,18 @@ import {
   createAdminRoutes,
   type AdminRepositoryFactory,
 } from './modules/admin/routes';
+import {
+  createTenantSettingsRepository,
+  createTenantSettingsRoutes,
+  type TenantSettingsRepositoryFactory,
+} from './modules/admin/tenant-settings';
 import { createAuthRoutes } from './modules/auth/routes';
 import { healthRoutes } from './modules/health/routes';
+import {
+  createMasterRepository,
+  createMasterRoutes,
+  type MasterRepositoryFactory,
+} from './modules/master/routes';
 import {
   createOrganizationRepository,
   createOrganizationRoutes,
@@ -64,6 +75,8 @@ export interface AppDependencies {
   readonly authRepositoryFactory?: AuthRepositoryFactory;
   readonly accessRepositoryFactory?: AccessRepositoryFactory;
   readonly adminRepositoryFactory?: AdminRepositoryFactory;
+  readonly tenantSettingsRepositoryFactory?: TenantSettingsRepositoryFactory;
+  readonly masterRepositoryFactory?: MasterRepositoryFactory;
   readonly organizationRepositoryFactory?: OrganizationRepositoryFactory;
   readonly rateLimitRepositoryFactory?: RateLimitRepositoryFactory;
   readonly sessionManagementRepositoryFactory?: SessionManagementRepositoryFactory;
@@ -74,6 +87,9 @@ export function createApp(dependencies: AppDependencies = {}) {
   const authRepositoryFactory = dependencies.authRepositoryFactory ?? createAuthRepository;
   const accessRepositoryFactory = dependencies.accessRepositoryFactory ?? createAccessRepository;
   const adminRepositoryFactory = dependencies.adminRepositoryFactory ?? createAdminRepository;
+  const tenantSettingsRepositoryFactory =
+    dependencies.tenantSettingsRepositoryFactory ?? createTenantSettingsRepository;
+  const masterRepositoryFactory = dependencies.masterRepositoryFactory ?? createMasterRepository;
   const organizationRepositoryFactory =
     dependencies.organizationRepositoryFactory ?? createOrganizationRepository;
   const rateLimitRepositoryFactory =
@@ -87,6 +103,8 @@ export function createApp(dependencies: AppDependencies = {}) {
   application.use('/api/v1/auth/*', tenantResolver(dependencies.tenantRepositoryFactory));
   application.use('/api/v1/access/*', tenantResolver(dependencies.tenantRepositoryFactory));
   application.use('/api/v1/admin/*', tenantResolver(dependencies.tenantRepositoryFactory));
+  application.use('/api/v1/master', tenantResolver(dependencies.tenantRepositoryFactory));
+  application.use('/api/v1/master/*', tenantResolver(dependencies.tenantRepositoryFactory));
   application.use(
     '/api/v1/auth/login',
     rateLimit('auth.login', LOGIN_RATE_LIMITS, rateLimitRepositoryFactory),
@@ -97,6 +115,8 @@ export function createApp(dependencies: AppDependencies = {}) {
   application.use('/api/v1/auth/sessions/*', authenticateSession(authRepositoryFactory));
   application.use('/api/v1/access/*', authenticateSession(authRepositoryFactory));
   application.use('/api/v1/admin/*', authenticateSession(authRepositoryFactory));
+  application.use('/api/v1/master', authenticateSession(authRepositoryFactory));
+  application.use('/api/v1/master/*', authenticateSession(authRepositoryFactory));
   application.use(
     '/api/v1/auth/sessions',
     rateLimit('auth.sessions', SESSION_MANAGEMENT_RATE_LIMITS, rateLimitRepositoryFactory),
@@ -113,8 +133,18 @@ export function createApp(dependencies: AppDependencies = {}) {
     '/api/v1/admin/*',
     rateLimit('admin.manage', ADMIN_RATE_LIMITS, rateLimitRepositoryFactory),
   );
+  application.use(
+    '/api/v1/master',
+    rateLimit('master.manage', ADMIN_RATE_LIMITS, rateLimitRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/master/*',
+    rateLimit('master.manage', ADMIN_RATE_LIMITS, rateLimitRepositoryFactory),
+  );
   application.use('/api/v1/access/*', loadAccessContext(accessRepositoryFactory));
   application.use('/api/v1/admin/*', loadAccessContext(accessRepositoryFactory));
+  application.use('/api/v1/master', loadAccessContext(accessRepositoryFactory));
+  application.use('/api/v1/master/*', loadAccessContext(accessRepositoryFactory));
   application.use(
     '/api/v1/access/branch',
     requirePermission('branch.switch', accessRepositoryFactory),
@@ -141,6 +171,47 @@ export function createApp(dependencies: AppDependencies = {}) {
     '/api/v1/admin/organization/*',
     requirePermission('settings.manage', accessRepositoryFactory),
   );
+  application.use(
+    '/api/v1/admin/tenant',
+    requirePermission('settings.manage', accessRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/master/directory',
+    requirePermission('product.view', accessRepositoryFactory),
+  );
+  for (const path of [
+    '/api/v1/master/categories/*',
+    '/api/v1/master/brands/*',
+    '/api/v1/master/units/*',
+    '/api/v1/master/products/*',
+    '/api/v1/master/product-units/*',
+  ]) {
+    application.use(
+      path,
+      requirePermissionByMethod(
+        { POST: 'product.create', PATCH: 'product.update' },
+        accessRepositoryFactory,
+      ),
+    );
+  }
+  application.use(
+    '/api/v1/master/prices/*',
+    requirePermissionByMethod({ POST: 'product.update' }, accessRepositoryFactory),
+  );
+  application.use(
+    '/api/v1/master/suppliers/*',
+    requirePermissionByMethod(
+      { POST: 'purchase.create', PATCH: 'purchase.create' },
+      accessRepositoryFactory,
+    ),
+  );
+  application.use(
+    '/api/v1/master/customers/*',
+    requirePermissionByMethod(
+      { POST: 'sales.create', PATCH: 'sales.create' },
+      accessRepositoryFactory,
+    ),
+  );
 
   application.route('/api/v1/health', healthRoutes);
   application.route('/api/v1/tenant', tenantRoutes);
@@ -152,9 +223,14 @@ export function createApp(dependencies: AppDependencies = {}) {
   application.route('/api/v1/access', createAccessRoutes(accessRepositoryFactory));
   application.route('/api/v1/admin', createAdminRoutes(adminRepositoryFactory));
   application.route(
+    '/api/v1/admin/tenant',
+    createTenantSettingsRoutes(tenantSettingsRepositoryFactory),
+  );
+  application.route(
     '/api/v1/admin/organization',
     createOrganizationRoutes(organizationRepositoryFactory),
   );
+  application.route('/api/v1/master', createMasterRoutes(masterRepositoryFactory));
 
   application.notFound((context) => {
     return context.json(

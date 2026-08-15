@@ -191,6 +191,120 @@ export interface OrganizationDirectoryData {
   readonly terminals: readonly PosTerminalData[];
 }
 
+export type MasterStatus = 'active' | 'inactive';
+export type ProductType = 'stock' | 'service';
+export type CustomerType = 'individual' | 'business';
+
+export interface CategoryData {
+  readonly id: string;
+  readonly parentId: string | null;
+  readonly code: string;
+  readonly name: string;
+  readonly description: string | null;
+  readonly status: MasterStatus;
+}
+
+export interface BrandData {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly description: string | null;
+  readonly status: MasterStatus;
+}
+
+export interface UnitData {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly symbol: string;
+  readonly precision: number;
+  readonly status: MasterStatus;
+}
+
+export interface ProductUnitData {
+  readonly id: string;
+  readonly productId: string;
+  readonly unitId: string;
+  readonly conversionNumerator: number;
+  readonly conversionDenominator: number;
+  readonly barcode: string | null;
+  readonly isBase: boolean;
+  readonly isSaleUnit: boolean;
+  readonly isPurchaseUnit: boolean;
+  readonly status: MasterStatus;
+}
+
+export interface ProductPriceData {
+  readonly id: string;
+  readonly productUnitId: string;
+  readonly branchId: string | null;
+  readonly amountMinor: number;
+  readonly currency: string;
+  readonly status: 'active' | 'superseded';
+  readonly validFrom: string;
+  readonly validTo: string | null;
+}
+
+export interface ProductData {
+  readonly id: string;
+  readonly categoryId: string | null;
+  readonly brandId: string | null;
+  readonly baseUnitId: string;
+  readonly sku: string;
+  readonly name: string;
+  readonly description: string | null;
+  readonly type: ProductType;
+  readonly status: MasterStatus;
+  readonly trackBatches: boolean;
+  readonly trackExpiry: boolean;
+  readonly allowDecimal: boolean;
+  readonly units: readonly ProductUnitData[];
+  readonly prices: readonly ProductPriceData[];
+}
+
+export interface SupplierData {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly contactName: string | null;
+  readonly phone: string | null;
+  readonly email: string | null;
+  readonly address: string | null;
+  readonly taxId: string | null;
+  readonly status: MasterStatus;
+}
+
+export interface CustomerData {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly type: CustomerType;
+  readonly phone: string | null;
+  readonly email: string | null;
+  readonly address: string | null;
+  readonly status: MasterStatus;
+}
+
+export interface MasterDirectoryData {
+  readonly categories: readonly CategoryData[];
+  readonly brands: readonly BrandData[];
+  readonly units: readonly UnitData[];
+  readonly products: readonly ProductData[];
+  readonly suppliers: readonly SupplierData[];
+  readonly customers: readonly CustomerData[];
+  readonly branches: readonly AdminBranchSummaryData[];
+}
+
+export interface TenantSettingsData {
+  readonly id: string;
+  readonly slug: string;
+  readonly name: string;
+  readonly plan: string;
+  readonly businessType: 'retail' | 'pharmacy' | 'retail_pharmacy';
+  readonly uiMode: 'simple' | 'professional' | 'advanced';
+  readonly timezone: string;
+}
+
 export interface HealthData {
   readonly status: 'ok';
   readonly environment: 'development' | 'staging' | 'production' | 'test';

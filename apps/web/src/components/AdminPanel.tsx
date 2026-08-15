@@ -3,17 +3,21 @@ import type {
   AdminUserData,
   RoleDirectoryData,
   SecurityEventListData,
+  TenantBootstrapData,
   UserDirectoryData,
 } from '@pos/contracts';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 
 import { getJson, patchJson, postJson } from '../lib/api';
+import { MasterDataPanel } from './MasterDataPanel';
 import { OrganizationPanel } from './OrganizationPanel';
+import { TenantSettingsPanel } from './TenantSettingsPanel';
 
 interface AdminPanelProperties {
   readonly permissions: readonly string[];
   readonly currentUserId: string;
+  readonly tenant: TenantBootstrapData;
 }
 
 const fieldClass =
@@ -430,18 +434,21 @@ function SecurityEventsPanel() {
   );
 }
 
-export function AdminPanel({ permissions, currentUserId }: AdminPanelProperties) {
+export function AdminPanel({ permissions, currentUserId, tenant }: AdminPanelProperties) {
   const canManageUsers = permissions.includes('user.manage');
   const canManageRoles = permissions.includes('role.manage');
-  const canViewSecurity = permissions.includes('settings.manage');
-  if (!canManageUsers && !canManageRoles && !canViewSecurity) return null;
+  const canManageSettings = permissions.includes('settings.manage');
+  const canViewMaster = permissions.includes('product.view');
+  if (!canManageUsers && !canManageRoles && !canManageSettings && !canViewMaster) return null;
 
   return (
     <div className="mt-8 grid items-start gap-5 lg:grid-cols-2">
+      {canManageSettings ? <TenantSettingsPanel tenant={tenant} /> : null}
       {canManageUsers ? <UsersPanel currentUserId={currentUserId} /> : null}
       {canManageRoles ? <RolesPanel /> : null}
-      {canViewSecurity ? <OrganizationPanel /> : null}
-      {canViewSecurity ? <SecurityEventsPanel /> : null}
+      {canManageSettings ? <OrganizationPanel /> : null}
+      {canViewMaster ? <MasterDataPanel permissions={permissions} /> : null}
+      {canManageSettings ? <SecurityEventsPanel /> : null}
     </div>
   );
 }
