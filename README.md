@@ -17,7 +17,7 @@ Production-oriented multi-tenant POS foundation for retail and pharmacy operatio
 - unit/integration tests for response contracts, request IDs, unknown routes, and dependency failures
 - lint, format, typecheck, test, and build quality gates
 
-### Implemented — Phase 1 security foundation (in progress)
+### Implemented — Phase 1 security foundation
 
 - global tenant and verified custom-domain schema with lifecycle constraints
 - server-side tenant resolution from the request hostname
@@ -49,6 +49,14 @@ Production-oriented multi-tenant POS foundation for retail and pharmacy operatio
 - session revocation audit logs and dedicated security events
 - `GET /api/v1/auth/sessions` and `DELETE /api/v1/auth/sessions/:sessionId`
 - session/device UI that never exposes raw session tokens
+- backend-authorized tenant user directory, secure user creation, assignment updates, and account disabling
+- backend-authorized custom role creation, permission assignment, role updates, and protected system roles
+- disabling a user atomically revokes that user's active sessions
+- tenant-scoped read-only security-event administration with bounded result limits
+- user/role mutations persisted as audit logs without password material
+- `GET`/`POST`/`PATCH` administration APIs under `/api/v1/admin/users` and `/api/v1/admin/roles`
+- `GET /api/v1/admin/security-events`
+- permission-adaptive administration UI for users, roles, and recent security events
 
 ### Tested and verified
 
@@ -56,7 +64,7 @@ Run `npm run validate` to reproduce all local quality gates, including applying 
 
 ### Not implemented yet
 
-Remaining Phase 1 work: role/user administration APIs and UI plus security-event administration. No business feature is represented as complete before its backend, authorization, UI, and tests exist.
+Phase 2 organization and master-data modules have not been implemented yet. No business feature is represented as complete before its backend, authorization, UI, migrations where needed, and tests exist.
 
 ## Repository layout
 

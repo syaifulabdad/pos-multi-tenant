@@ -1,5 +1,8 @@
 export type {
   AccessContextData,
+  AdminBranchSummaryData,
+  AdminRoleSummaryData,
+  AdminUserData,
   ApiError,
   ApiMeta,
   ApiResponse,
@@ -12,8 +15,12 @@ export type {
   LoginData,
   LogoutData,
   ManagedSessionData,
+  RoleDirectoryData,
+  SecurityEventData,
+  SecurityEventListData,
   SessionData,
   SessionListData,
   SessionRevokeData,
   TenantBootstrapData,
+  UserDirectoryData,
 } from './api';

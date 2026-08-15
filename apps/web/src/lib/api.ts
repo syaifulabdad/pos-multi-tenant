@@ -49,6 +49,14 @@ export function deleteJson<T>(path: string): Promise<T> {
   return requestJson(path, { method: 'DELETE' });
 }
 
+export function patchJson<T>(path: string, body: unknown): Promise<T> {
+  return requestJson(path, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
 export function postJson<T>(path: string, body?: unknown): Promise<T> {
   return requestJson(path, {
     method: 'POST',

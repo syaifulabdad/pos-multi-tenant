@@ -85,6 +85,65 @@ export interface SessionRevokeData {
   readonly current: boolean;
 }
 
+export interface AdminRoleSummaryData {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly description: string | null;
+  readonly isSystem: boolean;
+  readonly isActive: boolean;
+  readonly permissions: readonly string[];
+}
+
+export interface AdminBranchSummaryData {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+}
+
+export interface AdminUserData {
+  readonly id: string;
+  readonly email: string;
+  readonly name: string;
+  readonly status: 'invited' | 'active' | 'disabled';
+  readonly roles: readonly AdminRoleSummaryData[];
+  readonly branches: readonly AdminBranchSummaryData[];
+  readonly createdAt: string;
+  readonly lastLoginAt: string | null;
+}
+
+export interface UserDirectoryData {
+  readonly users: readonly AdminUserData[];
+  readonly roles: readonly AdminRoleSummaryData[];
+  readonly branches: readonly AdminBranchSummaryData[];
+}
+
+export interface RoleDirectoryData {
+  readonly roles: readonly AdminRoleSummaryData[];
+  readonly permissions: readonly {
+    readonly code: string;
+    readonly description: string;
+  }[];
+}
+
+export interface SecurityEventData {
+  readonly type: string;
+  readonly severity: string;
+  readonly requestId: string;
+  readonly user: {
+    readonly id: string;
+    readonly email: string;
+  } | null;
+  readonly metadata: Readonly<Record<string, unknown>> | null;
+  readonly ipAddress: string | null;
+  readonly userAgent: string | null;
+  readonly createdAt: string;
+}
+
+export interface SecurityEventListData {
+  readonly events: readonly SecurityEventData[];
+}
+
 export interface HealthData {
   readonly status: 'ok';
   readonly environment: 'development' | 'staging' | 'production' | 'test';

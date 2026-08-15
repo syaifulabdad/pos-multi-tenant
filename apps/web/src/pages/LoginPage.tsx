@@ -2,6 +2,7 @@ import type {
   AccessContextData,
   BranchData,
   LoginData,
+  LogoutData,
   ManagedSessionData,
   SessionListData,
   SessionRevokeData,
@@ -11,6 +12,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 
+import { AdminPanel } from '../components/AdminPanel';
 import { ApiClientError, deleteJson, getJson, postJson } from '../lib/api';
 
 function BrandMark() {
@@ -72,142 +74,168 @@ function LoginSuccess({ result }: { readonly result: LoginData }) {
       deleteJson<SessionRevokeData>(`/api/v1/auth/sessions/${session.id}`),
     onSuccess: () => sessions.refetch(),
   });
+  const logout = useMutation({
+    mutationFn: () => postJson<LogoutData>('/api/v1/auth/logout'),
+    onSuccess: () => window.location.reload(),
+  });
   const canSwitch = access.data?.permissions.includes('branch.switch') ?? false;
 
   return (
-    <div className="rounded-3xl border border-emerald-200 bg-white p-8 shadow-xl shadow-slate-900/5">
-      <span
-        className="grid size-12 place-items-center rounded-full bg-emerald-100 text-xl text-emerald-700"
-        aria-hidden="true"
-      >
-        ✓
-      </span>
-      <p className="mt-7 text-xs font-extrabold uppercase tracking-[0.2em] text-emerald-700">
-        Sesi aktif
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-        Selamat datang, {result.user.name}
-      </h1>
-      <p className="mt-3 text-sm leading-6 text-slate-600">
-        Identitas, permission, dan penugasan cabang diverifikasi kembali oleh server pada setiap
-        konteks operasional.
-      </p>
-      <div className="mt-7 rounded-2xl bg-slate-50 p-4">
-        <p className="text-xs font-bold text-slate-500">Masuk sebagai</p>
-        <p className="mt-1 text-sm font-semibold text-slate-900">{result.user.email}</p>
-      </div>
-
-      {access.isPending ? (
-        <div className="mt-4 h-20 animate-pulse rounded-2xl bg-slate-100" role="status" />
-      ) : access.isError ? (
-        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
-          Konteks akses belum dapat dimuat. Coba muat ulang halaman.
+    <div>
+      <div className="mx-auto max-w-md rounded-3xl border border-emerald-200 bg-white p-8 shadow-xl shadow-slate-900/5">
+        <span
+          className="grid size-12 place-items-center rounded-full bg-emerald-100 text-xl text-emerald-700"
+          aria-hidden="true"
+        >
+          ✓
+        </span>
+        <p className="mt-7 text-xs font-extrabold uppercase tracking-[0.2em] text-emerald-700">
+          Sesi aktif
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+          Selamat datang, {result.user.name}
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Identitas, permission, dan penugasan cabang diverifikasi kembali oleh server pada setiap
+          konteks operasional.
+        </p>
+        <div className="mt-7 flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4">
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-slate-500">Masuk sebagai</p>
+            <p className="mt-1 truncate text-sm font-semibold text-slate-900">
+              {result.user.email}
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={logout.isPending}
+            onClick={() => logout.mutate()}
+            className="shrink-0 text-xs font-extrabold text-slate-500 hover:text-rose-700 disabled:opacity-50"
+          >
+            {logout.isPending ? 'Keluar…' : 'Keluar'}
+          </button>
         </div>
-      ) : (
-        <div className="mt-4 rounded-2xl border border-slate-200 p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold text-slate-500">Cabang aktif</p>
-              <p className="mt-1 text-sm font-bold text-slate-950">
-                {access.data.activeBranch?.name ?? 'Belum dipilih'}
-              </p>
+
+        {access.isPending ? (
+          <div className="mt-4 h-20 animate-pulse rounded-2xl bg-slate-100" role="status" />
+        ) : access.isError ? (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+            Konteks akses belum dapat dimuat. Coba muat ulang halaman.
+          </div>
+        ) : (
+          <div className="mt-4 rounded-2xl border border-slate-200 p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold text-slate-500">Cabang aktif</p>
+                <p className="mt-1 text-sm font-bold text-slate-950">
+                  {access.data.activeBranch?.name ?? 'Belum dipilih'}
+                </p>
+              </div>
+              <span className="rounded-lg bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800">
+                {access.data.permissions.length} permission
+              </span>
             </div>
-            <span className="rounded-lg bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-800">
-              {access.data.permissions.length} permission
+
+            {access.data.branches.length > 1 && canSwitch ? (
+              <div className="mt-4 border-t border-slate-100 pt-4">
+                <label htmlFor="active-branch" className="text-xs font-bold text-slate-600">
+                  Ganti cabang
+                </label>
+                <select
+                  id="active-branch"
+                  value={access.data.activeBranch?.id ?? ''}
+                  disabled={branchSwitch.isPending}
+                  onChange={(event) => branchSwitch.mutate(event.target.value)}
+                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10"
+                >
+                  <option value="" disabled>
+                    Pilih cabang
+                  </option>
+                  {access.data.branches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.code} · {branch.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
+            {branchSwitch.isError ? (
+              <p className="mt-3 text-xs font-semibold text-rose-700" role="alert">
+                Cabang tidak dapat dipilih. Periksa kembali hak akses Anda.
+              </p>
+            ) : null}
+          </div>
+        )}
+
+        <div className="mt-4 rounded-2xl border border-slate-200 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-slate-500">Perangkat &amp; sesi</p>
+            <span className="text-[0.65rem] font-bold text-slate-400">
+              {sessions.data?.sessions.length ?? '—'} aktif
             </span>
           </div>
-
-          {access.data.branches.length > 1 && canSwitch ? (
-            <div className="mt-4 border-t border-slate-100 pt-4">
-              <label htmlFor="active-branch" className="text-xs font-bold text-slate-600">
-                Ganti cabang
-              </label>
-              <select
-                id="active-branch"
-                value={access.data.activeBranch?.id ?? ''}
-                disabled={branchSwitch.isPending}
-                onChange={(event) => branchSwitch.mutate(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10"
-              >
-                <option value="" disabled>
-                  Pilih cabang
-                </option>
-                {access.data.branches.map((branch) => (
-                  <option key={branch.id} value={branch.id}>
-                    {branch.code} · {branch.name}
-                  </option>
-                ))}
-              </select>
+          {sessions.isPending ? (
+            <div className="mt-3 h-12 animate-pulse rounded-xl bg-slate-100" role="status" />
+          ) : sessions.isError ? (
+            <p className="mt-3 text-xs font-semibold text-amber-700">
+              Daftar sesi belum dapat dimuat.
+            </p>
+          ) : (
+            <div className="mt-3 space-y-2">
+              {sessions.data.sessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold text-slate-800">
+                      {session.current ? 'Perangkat ini' : (session.userAgent ?? 'Perangkat lain')}
+                    </p>
+                    <p className="mt-0.5 text-[0.65rem] text-slate-400">
+                      Aktif {new Date(session.lastSeenAt).toLocaleString('id-ID')}
+                    </p>
+                  </div>
+                  {session.current ? (
+                    <span className="rounded-md bg-emerald-100 px-2 py-1 text-[0.6rem] font-black uppercase text-emerald-700">
+                      Saat ini
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={sessionRevoke.isPending}
+                      onClick={() => sessionRevoke.mutate(session)}
+                      className="shrink-0 text-[0.65rem] font-extrabold text-rose-700 hover:text-rose-900 disabled:opacity-50"
+                    >
+                      {sessionRevoke.isPending && sessionRevoke.variables?.id === session.id
+                        ? 'Mencabut…'
+                        : 'Cabut'}
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
-          ) : null}
-
-          {branchSwitch.isError ? (
+          )}
+          {sessionRevoke.isError ? (
             <p className="mt-3 text-xs font-semibold text-rose-700" role="alert">
-              Cabang tidak dapat dipilih. Periksa kembali hak akses Anda.
+              Sesi tidak dapat dicabut. Muat ulang lalu coba lagi.
             </p>
           ) : null}
         </div>
-      )}
-
-      <div className="mt-4 rounded-2xl border border-slate-200 p-4">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-bold text-slate-500">Perangkat &amp; sesi</p>
-          <span className="text-[0.65rem] font-bold text-slate-400">
-            {sessions.data?.sessions.length ?? '—'} aktif
-          </span>
-        </div>
-        {sessions.isPending ? (
-          <div className="mt-3 h-12 animate-pulse rounded-xl bg-slate-100" role="status" />
-        ) : sessions.isError ? (
-          <p className="mt-3 text-xs font-semibold text-amber-700">
-            Daftar sesi belum dapat dimuat.
-          </p>
-        ) : (
-          <div className="mt-3 space-y-2">
-            {sessions.data.sessions.map((session) => (
-              <div
-                key={session.id}
-                className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-bold text-slate-800">
-                    {session.current ? 'Perangkat ini' : (session.userAgent ?? 'Perangkat lain')}
-                  </p>
-                  <p className="mt-0.5 text-[0.65rem] text-slate-400">
-                    Aktif {new Date(session.lastSeenAt).toLocaleString('id-ID')}
-                  </p>
-                </div>
-                {session.current ? (
-                  <span className="rounded-md bg-emerald-100 px-2 py-1 text-[0.6rem] font-black uppercase text-emerald-700">
-                    Saat ini
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={sessionRevoke.isPending}
-                    onClick={() => sessionRevoke.mutate(session)}
-                    className="shrink-0 text-[0.65rem] font-extrabold text-rose-700 hover:text-rose-900 disabled:opacity-50"
-                  >
-                    {sessionRevoke.isPending && sessionRevoke.variables?.id === session.id
-                      ? 'Mencabut…'
-                      : 'Cabut'}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-        {sessionRevoke.isError ? (
-          <p className="mt-3 text-xs font-semibold text-rose-700" role="alert">
-            Sesi tidak dapat dicabut. Muat ulang lalu coba lagi.
-          </p>
-        ) : null}
       </div>
+      {access.data === undefined ? null : (
+        <AdminPanel permissions={access.data.permissions} currentUserId={result.user.id} />
+      )}
     </div>
   );
 }
 
 function LoginForm({ tenant }: { readonly tenant: TenantBootstrapData }) {
+  const existingSession = useQuery({
+    queryKey: ['current-session'],
+    queryFn: ({ signal }) => getJson<LoginData>('/api/v1/auth/me', signal),
+    retry: false,
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -221,12 +249,25 @@ function LoginForm({ tenant }: { readonly tenant: TenantBootstrapData }) {
     login.mutate({ email, password });
   }
 
+  if (existingSession.isPending) {
+    return (
+      <div
+        className="mx-auto max-w-md rounded-3xl border border-white bg-white p-9 shadow-xl shadow-slate-900/5"
+        role="status"
+      >
+        <div className="h-3 w-24 animate-pulse rounded bg-slate-200" />
+        <div className="mt-7 h-8 w-3/4 animate-pulse rounded bg-slate-200" />
+        <div className="mt-10 h-12 w-full animate-pulse rounded-xl bg-slate-100" />
+      </div>
+    );
+  }
   if (login.isSuccess) return <LoginSuccess result={login.data} />;
+  if (existingSession.isSuccess) return <LoginSuccess result={existingSession.data} />;
 
   const requestId = login.error instanceof ApiClientError ? login.error.requestId : undefined;
 
   return (
-    <div className="rounded-3xl border border-white bg-white p-7 shadow-[0_30px_90px_-50px_rgba(15,23,42,0.5)] sm:p-9">
+    <div className="mx-auto max-w-md rounded-3xl border border-white bg-white p-7 shadow-[0_30px_90px_-50px_rgba(15,23,42,0.5)] sm:p-9">
       <div className="mb-8">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800">
           <span className="size-1.5 rounded-full bg-teal-600" aria-hidden="true" />
@@ -330,7 +371,7 @@ export function LoginPage() {
         <span className="text-xs font-semibold text-slate-500">Akses terenkripsi</span>
       </header>
       <main className="relative mx-auto grid max-w-6xl place-items-center px-6 py-12 sm:py-20">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-6xl">
           {tenant.isPending ? (
             <div
               className="rounded-3xl border border-white bg-white p-9 shadow-xl shadow-slate-900/5"
